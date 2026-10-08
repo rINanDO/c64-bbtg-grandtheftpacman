@@ -24,8 +24,16 @@ for (let i = 0; i < 100; i++) {
 }
 console.log(scrolled);
 console.log(`d018=$${m.io[0x18].toString(16)} d016=$${m.io[0x16].toString(16)}  frames processed: ${calls}/100`);
-m.joy = 0x10; m.runFrames(5); m.joy = 0; m.runFrames(50);
+m.pressFire(); m.runFrames(60);
+console.log('after fire -> GTA intro:', m.screenText().includes('BBTG VIBATHON GROUP') && (m.io[0x16] & 0x10) !== 0);
+// let the GTA intro play out: logo, five stars, police lights
+let policeFrames = 0;
+m.runFrames(600, () => { if (m.io[0x20] === 2) policeFrames++; });
+const g = m.screenText().split('\n');
+console.log('GTA intro: stars lit', [0, 2, 4, 6, 8].filter((i) => m.io[0x800 + 12 * 40 + 15 + i] === 7).length, '/5, police lights', policeFrames > 0,
+  ', prompt', g[13].includes('PRESS FIRE TO HIT THE STREETS'));
+m.pressFire(); m.runFrames(60);
 const t = m.screenText();
 console.log('after fire -> title:', t.includes('PRESS FIRE OR SPACE TO START'), ' charset d018=$' + m.io[0x18].toString(16));
-m.joy = 0x10; m.runFrames(5); m.joy = 0; m.runFrames(150);
+m.pressFire(); m.runFrames(150);
 console.log('after fire -> game:', m.screenText().includes('READY!') || m.screenText().includes('SCORE'));

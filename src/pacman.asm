@@ -176,6 +176,7 @@ start:
         sta $d026
 
         jsr intro_bbtg
+        jsr intro_gta
 main_loop:
         jsr title_screen
         jsr new_game
@@ -1835,6 +1836,7 @@ code_end:
         .org $4000
         .include "music.asm"
         .include "intro.asm"
+        .include "intro_gta.asm"
 
 high_end:
         .assert high_end <= $a000, "high code runs into BASIC ROM"

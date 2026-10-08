@@ -28,7 +28,14 @@ The soundtrack is an original G-funk style tune for the SID. It opens with a pol
 * PWM chord arpeggios,
 * a vibrato "whistle" lead and an oscillator-sync lead.
 
-The music keeps playing on the title screen. Press fire or space to move on.
+Next comes a **GTA-style intro**:
+
+1. "BBTG Vibathon Group presents" fades in and out.
+2. A Vice City sunset rises and the skyline with palm trees and lit windows comes up.
+3. A big stacked **GRAND / THEFT / PAC-MAN** logo slams in with a white flash.
+4. Five wanted stars light up one by one, then the border flashes red and blue like police lights and a police chopper crosses the sky.
+
+The music keeps playing through both intros and the title screen. Press fire or space to skip ahead.
 
 ## Run in GTK3VICE
 

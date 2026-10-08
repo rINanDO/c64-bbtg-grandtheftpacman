@@ -40,8 +40,7 @@ function botDir() {
   return 0;
 }
 
-m.runFrames(30); m.joy = 0x10; m.runFrames(5); m.joy = 0; // skip intro
-m.runFrames(60); m.joy = 0x10; m.runFrames(5); m.joy = 0; // start game
+m.bootToTitle(); m.pressFire(); // start game
 let levelUps = 0, lastLevel = 1, frightSeen = 0, eaten = 0, lastScore = 0, deaths = 0, lastLives = 3;
 const bcd = () => [2, 1, 0].map((i) => r[Z.score + i].toString(16).padStart(2, '0')).join('');
 m.runFrames(frames, (f) => {

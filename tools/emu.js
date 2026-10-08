@@ -146,6 +146,8 @@ class C64 {
     this.joy = 0;            // bits: 0 up 1 down 2 left 3 right 4 fire (1 = pressed)
     this.keys = new Set();   // "PA,PB" pairs pressed
     this.io[0xc00] = 0x7f;
+    this.lineCol = Array.from({ length: 312 }, () => [0, 0]); // border/background seen on each raster line
+    this.lastLine = 0;
   }
   raster() { return Math.floor(this.cpu.cycles / 63) % 312; }
   read(a) {
@@ -170,6 +172,9 @@ class C64 {
     if (a >= 0xd000 && a < 0xe000 && (this.ram[1] & 7) & 4 && (this.ram[1] & 3)) { this.io[a - 0xd000] = v; return; }
     this.ram[a] = v;
   }
+  pressFire(frames = 5) { this.joy = 0x10; this.runFrames(frames); this.joy = 0; }
+  // boot, then press fire through the BBTG cracktro and the GTA intro to reach the title screen
+  bootToTitle() { this.runFrames(30); this.pressFire(); this.runFrames(60); this.pressFire(); this.runFrames(60); }
   load(prg) { const at = prg[0] | (prg[1] << 8); this.ram.set(prg.subarray(2), at); return at; }
   runFrames(n, onFrame) {
     for (let f = 0; f < n; f++) {
@@ -178,6 +183,8 @@ class C64 {
         const pc = this.cpu.pc;
         if (pc < 0x0801 || (pc >= 0x3000 && pc < 0x4000) || pc >= 0xa000) throw new Error(`PC escaped to $${pc.toString(16)}`);
         this.cpu.step();
+        const line = this.raster();
+        if (line !== this.lastLine) { this.lineCol[this.lastLine] = [this.io[0x20] & 15, this.io[0x21] & 15]; this.lastLine = line; }
       }
       if (onFrame) onFrame(f);
     }
