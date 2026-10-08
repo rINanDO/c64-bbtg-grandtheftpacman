@@ -163,7 +163,7 @@ class C64 {
       const end = this.cpu.cycles + 19656;
       while (this.cpu.cycles < end) {
         const pc = this.cpu.pc;
-        if (pc < 0x0801 || pc >= 0x3000) throw new Error(`PC escaped to $${pc.toString(16)}`);
+        if (pc < 0x0801 || (pc >= 0x3000 && pc < 0x4000) || pc >= 0xa000) throw new Error(`PC escaped to $${pc.toString(16)}`);
         this.cpu.step();
       }
       if (onFrame) onFrame(f);

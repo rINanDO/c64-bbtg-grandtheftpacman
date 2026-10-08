@@ -363,7 +363,7 @@ print_bcd:
 ; =====================================================================
 title_screen:
         jsr clear_screen
-        jsr siren_off
+        jsr music_init
         lda #<title_text
         sta ptr0
         lda #>title_text
@@ -405,11 +405,13 @@ title_screen:
         sta $d015
 
 @rel:   jsr wait_frame          ; wait until fire is released
+        jsr music_play
         jsr read_input
         lda joy
         and #$10
         bne @rel
 @loop:  jsr wait_frame
+        jsr music_play
         jsr random
         jsr set_anim
         jsr update_sprites
@@ -469,6 +471,7 @@ title_text:
 ;  game flow
 ; =====================================================================
 new_game:
+        jsr init_sid            ; music off, game sound effects on
         lda #0
         sta score
         sta score+1
@@ -1822,3 +1825,12 @@ code_end:
 
         .org $3800
         .include "gen_sprites.inc"
+
+; =====================================================================
+;  $4000+: CPU-only code and data (outside the VIC bank)
+; =====================================================================
+        .org $4000
+        .include "music.asm"
+
+high_end:
+        .assert high_end <= $a000, "high code runs into BASIC ROM"
