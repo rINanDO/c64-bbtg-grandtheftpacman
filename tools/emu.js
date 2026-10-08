@@ -173,8 +173,8 @@ class C64 {
     this.ram[a] = v;
   }
   pressFire(frames = 5) { this.joy = 0x10; this.runFrames(frames); this.joy = 0; }
-  // boot, then press fire through the BBTG cracktro and the GTA intro to reach the title screen
-  bootToTitle() { this.runFrames(30); this.pressFire(); this.runFrames(60); this.pressFire(); this.runFrames(60); }
+  // boot, then press fire through the BBTG splash, the BBTG cracktro and the GTA intro to reach the title screen
+  bootToTitle() { this.runFrames(30); this.pressFire(); this.runFrames(30); this.pressFire(); this.runFrames(60); this.pressFire(); this.runFrames(60); }
   load(prg) { const at = prg[0] | (prg[1] << 8); this.ram.set(prg.subarray(2), at); return at; }
   runFrames(n, onFrame) {
     for (let f = 0; f < n; f++) {

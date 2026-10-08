@@ -16,7 +16,9 @@ During play a laid-back GTA-style groove, **"Grove Street Cruise"** (original, D
 
 ## Intro & music
 
-The game boots into a **BBTG Vibathon Group 2026** cracktro in the style of the old scene groups:
+It starts with the **BBTG logo** on a black screen for about ten seconds. It fades in from black through darker shades of each colour, holds, and fades back out while the soundtrack's siren intro plays.
+
+Then comes a **BBTG Vibathon Group 2026** cracktro in the style of the old scene groups:
 
 * a big colour-cycling BBTG logo with a drop shadow,
 * sine-moving raster bars across the border and background,

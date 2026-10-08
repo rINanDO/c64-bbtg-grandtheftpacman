@@ -1,0 +1,125 @@
+Can you create a game called Pacman for a Commodore 64 which uses images of GTA instead of ghosts? The artifact of the game must be able to mount as a disk image in a Commodore 64 emulator  GTK3VICE
+------------------
+
+I've built the game, and the disk image is at C:\Git\c64\build\pacman.d64. I haven't run it in VICE, because VICE isn't installed on this machine. Instead I tested it in a small 6502 emulator I wrote, which runs the game logic but doesn't draw the screen or play sound. So the colours, sprite display and sound are still unchecked; I'd only expect small cosmetic fixes there.
+
+To play in GTK3VICE: drag pacman.d64 onto the VICE window, or attach it to drive 8 and type LOAD"*",8,1 then RUN. Use a joystick in port 2, or the W A S D keys and SPACE to start.
+
+What's in it
+- Enemies: the four ghosts are replaced by a wanted list: an Officer, a police Cruiser with a flashing light bar, a Chopper with a spinning rotor, and a Tank. They chase you the way the original ghosts do, each in a different way.
+- Power pellets: these are flashing green $ cash symbols. Grabbing one turns the enemies blue so you can catch them for 200, 400, 800 and 1600 points.
+- Screen and sound:
+  - a maze with arcade-style outlined walls and wrap-around side tunnels;
+  - a side panel with score, high score, level, lives and "WANTED" stars that rise with each level;
+  - a police siren playing in the background, plus a "BUSTED!" death animation.
+- Game rules: you start with 3 lives and earn an extra one at 10,000 points. Enemies get faster each level.
+
+About the "GTA images": these are my own GTA-style pixel drawings, not pictures from the games. Real GTA artwork is copyrighted, and a C64 sprite is tiny (16×16 pixels with 3 colours), so a real image wouldn't fit anyway.
+
+Test results in my emulator
+- The title screen, maze and score panel draw correctly.
+- Dots are eaten and scored, and clearing a level gives 2320 points and moves to the next level. A bot cleared 4 levels in a row, and the extra life at 10,000 was awarded.
+- Cash makes the enemies blue, and catching them scores 200 and then 400.
+- Losing a life works, and after game over it goes back to the title screen with the high score kept.
+- I read the disk image back the way a C64 disk drive would, and the file on it matches the game exactly.
+
+To rebuild after changes, run node tools/build.js. The game code is in src/pacman.asm, and the maze and sprite drawings are in tools/build.js, so you can redraw the enemies there. The README.md has the details.
+---------------------
+
+
+Please add add an intro on start of the app in GTA style and music which uses the SID capability extensively. Also add the branding of BBTG as the
+  "BBTG Vibathon Group 2026" with colorful bars like the hacker groups back in the time.
+--------------------------------------------------------------------
+
+I've added the BBTG Vibathon Group 2026 cracktro, the GTA-style intro and SID music, and committed each change on top of your "Initial version". The new disk image is build/pacman.d64 and mounts in GTK3VICE as before.
+
+What happens when it starts:
+
+1. BBTG Vibathon Group 2026 cracktro, in the style of the old cracker groups:
+   - a big colour-cycling BBTG logo with a drop shadow;
+   - raster bars in five colours waving up and down through the border and background;
+   - a colour band behind "VIBATHON GROUP 2026";
+   - a smooth scrolling message line with greetings.
+2. GTA-style intro:
+   - "BBTG Vibathon Group presents" fades in and out;
+   - a Vice City-style sunset rises, then a city skyline with palm trees and lit windows;
+   - a big stacked GRAND / THEFT / PAC-MAN logo (white letters, black outline, red shadow) slams in with a white flash;
+   - five wanted stars light up one by one;
+   - the border flashes red and blue like police lights, and a police helicopter flies across.
+3. Then the title screen and the game, as before. Fire or space skips each part.
+
+Music: an original G-funk-style track (not the GTA theme, which is copyrighted). It plays through both intros and the title screen, then stops for the game's own sound effects. It uses a lot of what the SID chip can do:
+- drums made from noise and pulse waveforms;
+- a bass with a resonant filter that sweeps;
+- fast chord arpeggios with a pulse-width sweep;
+- a whistle lead with vibrato and a second lead with oscillator sync;
+- an opening that imitates a police siren.
+
+Commits:
+- 277e0a9 Add SID music player and original soundtrack
+- 4571a5b Add BBTG Vibathon Group 2026 cracktro with raster bars
+- 9e9e8c2 Add GTA-style intro sequence
+
+Each commit includes the rebuilt .d64 and an updated README.
+
+How I checked it: I extended my test emulator so it can save screenshots, and the GTA intro and the game screens look right. The intro test confirms both intros run at a full 50 frames per second, all five stars light up, the police lights flash, and fire takes you to the title and then the game. The earlier game tests still pass.
+
+Still unchecked:
+- Music: I can't listen to anything here, so I only confirmed that the right notes and instruments start on the right voices.
+- Raster bars: my emulator doesn't copy the C64's exact timing, so on real timing they could have small ragged edges.
+- Cracktro text: it can only appear as placeholder blocks in my screenshots, because I don't have the C64's built-in character set.
+
+Please run it in VICE and tell me if anything looks or sounds off.
+
+
+-------------------------
+Can you add following scrolling text in the intro:
+"Welcome to the BBTG Vibathon Group 2026!
+AI is unbelievable and the C64 isn't excluded!
+All the data centers are building a 20kb game in just minutes!!
+Thanks to Anthony, Jeffrey, Jochem, and everybody else here in Leusden!!!"
+
+Please add a background GTA music during gameplay
+-------------------------
+
+I've added your scroll text to the intro and background music during gameplay, as two separate commits. The updated disk image is build/pacman.d64.
+
+Scroll text (a3d19c2)
+- Your four lines now start the cracktro's scrolling message, followed by the existing text.
+- It's shown in capitals, because the C64's standard character set only has upper case. The punctuation is kept as you wrote it.
+- I ran the intro and checked that every line actually scrolls past.
+
+In-game music (46cb0da)
+- The track: a new, laid-back GTA-style groove called "Grove Street Cruise". It's my own composition, not the GTA theme. It has drums, a filtered bass, chord stabs and a lead melody.
+- What changed in the sound: the C64 sound chip only has three voices, and the game was using all three. So:
+  - the music now uses voices 1 and 2;
+  - all game sounds (waka, cash, busting a cop, death, extra life) moved to voice 3, so they're always heard over the music;
+  - the old background police siren is gone, since the music replaces it.
+- When it plays: the music stops when you get busted or clear a level, and starts again with the next life or level. The intro and title screen keep their own song.
+- Speed: with the music on, the game still runs every frame at the full 50 per second, with plenty of time to spare. The level-clear, power-pellet and intro tests all still pass.
+
+As before, I can't listen to anything here, so I've only confirmed that the right notes play on the right voices. The volume balance between the music and the sound effects is the thing most likely to need adjusting once you hear it in VICE. If the music drowns out the waka, I can make it quieter.
+
+----------------
+Can you add a scene in the intro that pacman steals a car and the police are following him
+Can you add at the beginning of the intro the BBTG Logo for about 10 seconds with fade in and fade out.
+-----------------------------
+I've added both: the car theft and police chase in the GTA intro, and the BBTG logo with fade in and fade out at boot. Each is its own commit, and the updated disk image is build/pacman.d64.
+
+Car theft and police chase (742378b)
+- After the GRAND THEFT PAC-MAN logo appears, Pac-Man walks down the street to a parked red sports car.
+- He steals it: he disappears into the driver's seat (you can see his head in the window) and the hazard lights flash. That's wanted star 1.
+- He speeds off, and two black-and-white police cars with flashing red and white light bars chase him across the screen.
+- The wanted stars now go up during the chase instead of on a timer. At five stars the border flashes police colours and the helicopter joins in.
+- The chase keeps going round until you press fire.
+- It needed four new pictures (the getaway car, two police-car frames and Pac-Man behind the wheel). They use up the last free sprite space, so there's no room left for more sprites without rearranging memory.
+
+BBTG logo at the start (54195fd)
+- It's now the very first thing you see: the big BBTG block logo centred on black, with "VIBATHON GROUP" and "2026" underneath. It's coloured yellow at the top through green and cyan to blue at the bottom.
+- It fades in over 2 seconds, stays for about 5, then fades out over 2. The cracktro starts after 9.6 seconds.
+- The fade goes through darker shades of each colour, the classic C64 way of fading. The music's siren opening plays underneath.
+- Fire skips it.
+
+Checks: screenshots from my test emulator show Pac-Man walking to the parked car, the police cars chasing it, and the BBTG logo at full brightness. The tests confirm the full sequence works: walk, steal, chase, five stars, and the chase looping. The splash timing is right, everything still runs at full speed, and the game tests pass.
+
+One rough edge: when the chase loops, each car appears from the left edge suddenly rather than driving in smoothly. That's because the C64 can't place a sprite partly off the left side of the screen. Leaving the right side is smooth. If it bothers you in VICE, I can make the chase start from inside the screen instead.

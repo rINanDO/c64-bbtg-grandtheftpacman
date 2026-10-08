@@ -11,6 +11,13 @@ m.cpu.pc = 2061;
 const syms = Object.fromEntries(fs.readFileSync(path.join(__dirname, '..', 'build', 'pacman.sym'), 'utf8')
   .trim().split('\n').map((l) => { const [k, v] = l.split(' = $'); return [k, parseInt(v, 16)]; }));
 
+// boot splash: BBTG logo fades in, holds, fades out, then the cracktro starts by itself
+let splashFull = false, crackAt = -1;
+m.runFrames(560, (f) => {
+  if (m.ram[0xb2] === 4) splashFull = true;
+  if (crackAt < 0 && m.screenText().includes('PROUDLY PRESENTS')) crackAt = f;
+});
+console.log(`splash: reached full colour ${splashFull}, cracktro after ${(crackAt / 50).toFixed(1)} s`);
 m.runFrames(200, () => {});
 const scrolled = m.screenText();
 // every video frame must run the per-frame work once (no dropped frames)

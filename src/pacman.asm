@@ -176,6 +176,7 @@ start:
         lda #10
         sta $d026
 
+        jsr logo_splash
         jsr intro_bbtg
         jsr intro_gta
 main_loop:
@@ -1836,6 +1837,7 @@ code_end:
 ; =====================================================================
         .org $4000
         .include "music.asm"
+        .include "splash.asm"
         .include "intro.asm"
         .include "intro_gta.asm"
 
