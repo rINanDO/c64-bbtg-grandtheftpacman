@@ -10,7 +10,9 @@ Pac-Man for the C64 where the four ghosts are replaced by a GTA-style wanted lis
 | Tank    | TREADS   | chases until close, then backs off to its corner  |
 
 Grab the flashing green **$ cash** to scare them (they turn blue), then bust them for 200/400/800/1600.
-The HUD's WANTED stars rise with each level, and a police siren plays in the background. You get an extra life at 10,000.
+The HUD's WANTED stars rise with each level. You get an extra life at 10,000.
+
+During play a laid-back GTA-style groove, **"Grove Street Cruise"** (original, D minor), runs on SID voices 1 and 2. It has drums, a filtered bass, chord stabs and a lead hook. Voice 3 is kept for the waka and the other sound effects so they always cut through. The music stops when you get busted and starts again on the next life or level.
 
 ## Intro & music
 

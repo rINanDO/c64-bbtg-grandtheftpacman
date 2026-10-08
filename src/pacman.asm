@@ -112,6 +112,7 @@ eptr     = $63
 ecol     = $68
 score    = $70                 ; 3 bytes BCD, low first
 hiscore  = $73                 ; 3 bytes BCD
+gmusic   = $76                 ; in-game music playing
 
 ; ------------------------------------------------------------ BASIC stub: 10 SYS2061
         .org $0801
@@ -232,20 +233,10 @@ init_sid:
         bpl @clr
         lda #$0f
         sta $d418
-        lda #$00                ; voice 1: waka
-        sta $d405
-        lda #$a0
-        sta $d406
-        lda #$00                ; voice 2: effects
-        sta $d40c
-        lda #$f0
-        sta $d40d
-        lda #$08
-        sta $d40a               ; pulse width for voice 2
-        lda #$00                ; voice 3: police siren, quiet
-        sta $d413
-        lda #$40
-        sta $d414
+        lda #$08                ; pulse width for the effects voice (3)
+        sta $d411
+        lda #0
+        sta gmusic
         rts
 
 clear_screen:
@@ -499,6 +490,7 @@ start_level:
         sta dots+1
         jsr set_speeds
         jsr reset_actors
+        jsr game_music
         jmp ready_pause
 
 set_speeds:
@@ -608,7 +600,6 @@ game_loop:
 @nos:   jsr read_input
         jsr flash_power
         jsr sound_tick
-        jsr siren_tick
         jsr update_modes
         jsr move_pac
         ldx #1
@@ -631,6 +622,7 @@ game_loop:
         lda lives
         beq @over
         jsr reset_actors
+        jsr game_music
         jsr ready_pause
         jmp @frame
 
@@ -679,7 +671,7 @@ update_hiscore:
 @no:    rts
 
 death_seq:
-        jsr siren_off
+        jsr music_stop
         ldx #8                  ; show "BUSTED!" on the HUD line under the house
 @bt:    lda busted_txt,x
         sta READY_POS-2,x
@@ -717,7 +709,7 @@ death_seq:
         rts
 
 level_clear:
-        jsr siren_off
+        jsr music_stop
         lda #50
         jsr wait_frames
         lda #$01
@@ -1715,35 +1707,47 @@ update_sprites:
 ; =====================================================================
 ;  sound
 ; =====================================================================
+SFXV = $d40e                    ; voice 3 registers: all game sound effects
+
 waka:
+        lda sfxt                ; a sound effect has priority
+        bne @r
         lda wakaf
         eor #1
         sta wakaf
         tay
         lda waka_hi,y
-        sta $d401
+        sta SFXV+1
         lda #0
-        sta $d400
+        sta SFXV
+        sta SFXV+5
+        lda #$a0
+        sta SFXV+6
         lda #$10
-        sta $d404
+        sta SFXV+4
         lda #$11
-        sta $d404
+        sta SFXV+4
         lda #4
         sta wakat
-        rts
+@r:     rts
 
 waka_hi:
         .byte $12, $18
 
-; A = effect number (voice 2: frequency sweep)
+; A = effect number (voice 3: frequency sweep)
 play_sfx:
         tay
+        lda #0
+        sta wakat
+        sta SFXV+5
+        lda #$f0
+        sta SFXV+6
         lda sfx_flo,y
         sta sfxlo
-        sta $d407
+        sta SFXV
         lda sfx_fhi,y
         sta sfxhi
-        sta $d408
+        sta SFXV+1
         lda sfx_dlo,y
         sta sfxdl
         lda sfx_dhi,y
@@ -1753,9 +1757,9 @@ play_sfx:
         lda sfx_wav,y
         sta sfxwave
         and #$fe
-        sta $d40b
+        sta SFXV+4
         lda sfxwave
-        sta $d40b
+        sta SFXV+4
         rts
 
 ;           power  eat   death  extra  start
@@ -1767,56 +1771,53 @@ sfx_len: .byte 30,   20,   90,   30,   100
 sfx_wav: .byte $11,  $21,  $21,  $11,  $41
 
 sound_tick:
-        lda wakat
+        lda gmusic              ; in-game background music on voices 1-2
+        beq @nm
+        jsr music_play
+@nm:    lda wakat
         beq @s2
         dec wakat
         bne @s2
         lda #$10
-        sta $d404
+        sta SFXV+4
 @s2:    lda sfxt
         beq @r
         dec sfxt
         bne @sw
         lda sfxwave
         and #$fe
-        sta $d40b
+        sta SFXV+4
         rts
 @sw:    lda sfxlo
         clc
         adc sfxdl
         sta sfxlo
-        sta $d407
+        sta SFXV
         lda sfxhi
         adc sfxdh
         sta sfxhi
-        sta $d408
+        sta SFXV+1
 @r:     rts
 
-; voice 3: wee-woo police siren, or a nervous warble while they are scared
-siren_tick:
-        lda frt
-        ora frt+1
-        beq @police
-        lda frame
-        and #7
-        clc
-        adc #$06
-        bne @set
-@police:
-        lda frame
-        and #$10
-        beq @lo
-        lda #$22
-        bne @set
-@lo:    lda #$1a
-@set:   sta $d40f
-        lda #$11
-        sta $d412
+; start the in-game GTA groove (voices 1-2)
+game_music:
+        lda #SONG_GAME
+        jsr music_init
+        lda #$08                ; pulse width for the effects voice
+        sta SFXV+3
+        lda #0
+        sta sfxt
+        sta wakat
+        lda #1
+        sta gmusic
         rts
 
-siren_off:
-        lda #$10
-        sta $d412
+music_stop:
+        lda #0
+        sta gmusic
+        sta $d404
+        sta $d40b
+        sta $d417
         rts
 
 ; =====================================================================

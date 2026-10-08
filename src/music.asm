@@ -1,6 +1,6 @@
 ; =====================================================================
 ;  SID music player
-;  - 3 voices, each with its own byte stream (notes, durations, instruments)
+;  - up to 3 voices, each with its own byte stream (notes, durations, instruments)
 ;  - wavetable per instrument: waveform + arpeggio/absolute pitch per frame
 ;    (drums, chord arpeggios, pitch scoops)
 ;  - pulse width modulation, delayed vibrato, hard restart
@@ -9,28 +9,45 @@
 ;  stream bytes:  $00-$5f note   $60-$7f duration 1-32 steps
 ;                 $80-$8f instrument   $fd hold   $fe rest   $ff loop
 ; =====================================================================
-MUS_SPEED = 7                   ; frames per step (~107 bpm in 16ths)
+SONG_TITLE = 0                  ; intro / title soundtrack, 3 voices
+SONG_GAME  = 1                  ; in-game groove, voices 1-2 (voice 3 = sound effects)
 mptr      = $90                 ; zero page pointer
 
-; start the music unless it is already playing
+; start the title music unless it is already playing
 music_start:
         lda music_on
         bne @r
         inc music_on
+        lda #SONG_TITLE
         jmp music_init
 @r:     rts
 
+; A = song number
 music_init:
+        sta m_song
+        tay
+        lda song_speed,y
+        sta m_speed
+        lda song_last,y         ; highest voice index the song uses
+        sta m_last
+        tya                     ; Y = song * 3 (index into the voice tables)
+        asl
+        adc m_song
+        tay
         ldx #$18
         lda #0
 @clr:   sta $d400,x
         dex
         bpl @clr
-        ldx #2
-@v:     lda mus_start_lo,x
+        ldx #0
+@v:     lda song_start_lo,y
         sta m_ptrlo,x
-        lda mus_start_hi,x
+        lda song_start_hi,y
         sta m_ptrhi,x
+        lda song_loop_lo,y
+        sta m_looplo,x
+        lda song_loop_hi,y
+        sta m_loophi,x
         lda #1
         sta m_dur,x
         lda #4
@@ -43,8 +60,10 @@ music_init:
         sta m_vibdel,x
         lda #$fe
         sta m_gate,x
-        dex
-        bpl @v
+        iny
+        inx
+        cpx #3
+        bne @v
         lda #1
         sta m_tick
         lda #0
@@ -60,19 +79,17 @@ music_init:
 music_play:
         dec m_tick
         bne @frames
-        lda #MUS_SPEED
+        lda m_speed
         sta m_tick
-        ldx #0
-        jsr voice_step
-        ldx #1
-        jsr voice_step
-        ldx #2
-        jsr voice_step
+        ldx m_last
+@st:    jsr voice_step
+        dex
+        bpl @st
 @frames:
         lda m_tick              ; hard restart: release gate one frame early
         cmp #1
         bne @nohr
-        ldx #2
+        ldx m_last
 @hr:    lda m_dur,x
         cmp #1
         bne @nhr
@@ -84,12 +101,10 @@ music_play:
         sta m_gate,x
 @nhr:   dex
         bpl @hr
-@nohr:  ldx #0
-        jsr voice_frame
-        ldx #1
-        jsr voice_frame
-        ldx #2
-        jsr voice_frame
+@nohr:  ldx m_last
+@fr:    jsr voice_frame
+        dex
+        bpl @fr
         jmp filter_frame
 
 ; ---- advance the stream of voice X by one step
@@ -124,9 +139,9 @@ voice_step:
 @inst:  and #$0f
         sta m_inst,x
         jmp @next
-@loop:  lda mus_loop_lo,x
+@loop:  lda m_looplo,x
         sta mptr
-        lda mus_loop_hi,x
+        lda m_loophi,x
         sta mptr+1
         ldy #0
         jmp @next
@@ -361,6 +376,11 @@ m_vibhi:  .fill 3
 m_vibcnt: .fill 3
 m_vibdir: .fill 3
 m_vibdel: .fill 3
+m_looplo: .fill 3
+m_loophi: .fill 3
+m_song:   .byte 0
+m_speed:  .byte 0
+m_last:   .byte 0
 m_tick:   .byte 0
 m_ctrl:   .byte 0
 m_cn:     .byte 0
