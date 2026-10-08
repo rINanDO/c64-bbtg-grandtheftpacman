@@ -69,14 +69,18 @@ intro_gta:
         sta gt_heli
         sta gt_flash
         sta gt_stars
-        ; chopper sprite: black silhouette, yellow cockpit, red beacon
-        lda #$01
+        sta ch_state
+        ; chopper + car chase sprites (see chase.asm): multicolour black
+        ; (sprite colour), white ($d025) and red ($d026)
+        lda #$35
         sta $d01c
-        sta $d01d
+        sta $d01d               ; chopper and cars twice as wide
+        lda #$34
+        sta $d017               ; cars twice as tall
         lda #0
-        sta $d017
         sta $d027
-        lda #7
+        sta $d015
+        lda #1
         sta $d025
         lda #2
         sta $d026
@@ -118,6 +122,7 @@ intro_gta:
 @exit:  lda #0
         sta $d015
         sta $d01d
+        sta $d017
         sta $d010
         sta $d020
         sta $d021
@@ -168,16 +173,12 @@ EV_CLEARTXT = 160
 EV_SUNSET   = 165
 EV_SKYLINE  = 270
 EV_SLAM     = 300
-EV_STAR1    = 340
+EV_CHASE    = 320                ; the stars now come from the car chase
 
-ev_lo:  .byte <EV_PRESENTS, <EV_FADEOUT, <EV_CLEARTXT, <EV_SUNSET, <EV_SKYLINE, <EV_SLAM
-        .byte <EV_STAR1, <[EV_STAR1+30], <[EV_STAR1+60], <[EV_STAR1+90], <[EV_STAR1+120], <[EV_STAR1+150], $ff
-ev_hi:  .byte >EV_PRESENTS, >EV_FADEOUT, >EV_CLEARTXT, >EV_SUNSET, >EV_SKYLINE, >EV_SLAM
-        .byte >EV_STAR1, >[EV_STAR1+30], >[EV_STAR1+60], >[EV_STAR1+90], >[EV_STAR1+120], >[EV_STAR1+150], $ff
-ev_jl:  .byte <ev_presents, <ev_fadeout, <ev_cleartxt, <ev_sunset, <ev_skyline, <ev_slam
-        .byte <ev_star, <ev_star, <ev_star, <ev_star, <ev_star, <ev_wanted
-ev_jh:  .byte >ev_presents, >ev_fadeout, >ev_cleartxt, >ev_sunset, >ev_skyline, >ev_slam
-        .byte >ev_star, >ev_star, >ev_star, >ev_star, >ev_star, >ev_wanted
+ev_lo:  .byte <EV_PRESENTS, <EV_FADEOUT, <EV_CLEARTXT, <EV_SUNSET, <EV_SKYLINE, <EV_SLAM, <EV_CHASE, $ff
+ev_hi:  .byte >EV_PRESENTS, >EV_FADEOUT, >EV_CLEARTXT, >EV_SUNSET, >EV_SKYLINE, >EV_SLAM, >EV_CHASE, $ff
+ev_jl:  .byte <ev_presents, <ev_fadeout, <ev_cleartxt, <ev_sunset, <ev_skyline, <ev_slam, <ev_chase
+ev_jh:  .byte >ev_presents, >ev_fadeout, >ev_cleartxt, >ev_sunset, >ev_skyline, >ev_slam, >ev_chase
 
 ev_presents:
         lda #<presents_text
@@ -261,8 +262,6 @@ ev_wanted:                      ; five stars: sirens on, chopper up
         lda #0
         sta heli_x
         sta heli_x+1
-        lda #$01
-        sta $d015
         lda #<credit_text
         sta ptr0
         lda #>credit_text
@@ -388,8 +387,6 @@ gta_effects:
         sta heli_x+1
 @hpos:  lda heli_x
         sta $d000
-        lda heli_x+1
-        sta $d010
         lda frame
         lsr
         lsr
@@ -398,7 +395,7 @@ gta_effects:
         adc #SPR_ENEMY+4
         sta SPRPTR
 @noheli:
-        rts
+        jmp chase_tick
 
 ; copy scene row A (chars + colours) to the screen
 copy_scene_row:
@@ -453,4 +450,5 @@ credit_text:
         .scr "(C) 2026 BBTG VIBATHON GROUP",0
         .byte $ff
 
+        .include "chase.asm"
         .include "gen_gta.inc"

@@ -28,7 +28,7 @@ m.pressFire(); m.runFrames(60);
 console.log('after fire -> GTA intro:', m.screenText().includes('BBTG VIBATHON GROUP') && (m.io[0x16] & 0x10) !== 0);
 // let the GTA intro play out: logo, five stars, police lights
 let policeFrames = 0;
-m.runFrames(600, () => { if (m.io[0x20] === 2) policeFrames++; });
+m.runFrames(800, () => { if (m.io[0x20] === 2) policeFrames++; });
 const g = m.screenText().split('\n');
 console.log('GTA intro: stars lit', [0, 2, 4, 6, 8].filter((i) => m.io[0x800 + 12 * 40 + 15 + i] === 7).length, '/5, police lights', policeFrames > 0,
   ', prompt', g[13].includes('PRESS FIRE TO HIT THE STREETS'));

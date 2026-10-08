@@ -35,7 +35,8 @@ Next comes a **GTA-style intro**:
 1. "BBTG Vibathon Group presents" fades in and out.
 2. A Vice City sunset rises and the skyline with palm trees and lit windows comes up.
 3. A big stacked **GRAND / THEFT / PAC-MAN** logo slams in with a white flash.
-4. Five wanted stars light up one by one, then the border flashes red and blue like police lights and a police chopper crosses the sky.
+4. **The heist:** Pac-Man walks down the street to a parked red sports car and steals it. The hazard lights flash while he hot-wires it, and you get wanted star 1. He speeds off with two black-and-white police cruisers chasing him, light bars flashing.
+5. The wanted level climbs during the chase. At five stars the border flashes red and blue like police lights and a police chopper joins in. The chase keeps looping until you press fire.
 
 The music keeps playing through both intros and the title screen. Press fire or space to skip ahead.
 

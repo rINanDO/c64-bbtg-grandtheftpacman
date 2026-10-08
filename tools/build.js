@@ -171,6 +171,30 @@ for (const art of [COP_A, COP_B, CAR_A, CAR_B, HELI_A, HELI_B, TANK_A, TANK_B]) 
 sprites.push(mcSprite(FRIGHT_A)); sprites.push(mcSprite(FRIGHT_B));    // $F1-$F2
 for (let i = 0; i < 8; i++) sprites.push(i === 7 ? hiresSprite(() => false) : pacSprite(0, 60 + i * 18)); // $F3-$FA death
 
+// intro car chase, side views facing right (12 multicolour pixels wide, drawn from the top row)
+function mcSprite12(rows) {
+  const MC = { '.': 0, w: 1, a: 2, r: 3 };
+  const out = new Array(64).fill(0);
+  rows.forEach((r, y) => {
+    if (r.length !== 12) throw new Error(`sprite row '${r}' must be 12 wide`);
+    let v = 0;
+    for (const ch of r) v = (v << 2) | MC[ch];
+    out[y * 3] = (v >> 16) & 0xff; out[y * 3 + 1] = (v >> 8) & 0xff; out[y * 3 + 2] = v & 0xff;
+  });
+  return out;
+}
+const GETAWAY = [ // red sports car: a = black (sprite colour), w = white, r = red
+  '...aaaaaa...', '..awwwawwwa.', '.awwwwawwwwa', 'arrrrrrrrrra', 'rrrrrrrrrrrw',
+  'rrrrrrrrrrrr', 'rraarrrraarr', '.aawa..aawa.', '..aa....aa..'];
+const COP_CAR_A = [ // black & white police cruiser with a red/white light bar
+  '....rrww....', '...wwwwww...', '..waaawaaaw.', '.wwaaawaaaww', 'wwwwwwwwwwww',
+  'aaawwwwwwaaw', 'aaawwwwwwaaa', '.aawa..aawa.', '..aa....aa..'];
+const COP_CAR_B = COP_CAR_A.map((r, i) => (i === 0 ? '....wwrr....' : r));
+const DRIVER = ['..XXX.', '.XXXXX', '.XXX..', '.XXXXX', '..XXX.']; // Pac-Man behind the wheel
+sprites.push(mcSprite12(GETAWAY), mcSprite12(COP_CAR_A), mcSprite12(COP_CAR_B));      // $FB-$FD
+sprites.push(hiresSprite((x, y) => DRIVER[y] !== undefined && DRIVER[y][x] === 'X'));  // $FE
+if (sprites.length > 0x100 - 0xe0) throw new Error('sprite data overflows $4000');
+
 // ---------------------------------------------------------------- emit include files
 const byteLines = (label, arr) => {
   let s = label ? `${label}:\n` : '';
