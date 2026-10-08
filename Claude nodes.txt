@@ -1,0 +1,23 @@
+I've built the game, and the disk image is at C:\Git\c64\build\pacman.d64. I haven't run it in VICE, because VICE isn't installed on this machine. Instead I tested it in a small 6502 emulator I wrote, which runs the game logic but doesn't draw the screen or play sound. So the colours, sprite display and sound are still unchecked; I'd only expect small cosmetic fixes there.
+
+To play in GTK3VICE: drag pacman.d64 onto the VICE window, or attach it to drive 8 and type LOAD"*",8,1 then RUN. Use a joystick in port 2, or the W A S D keys and SPACE to start.
+
+What's in it
+- Enemies: the four ghosts are replaced by a wanted list: an Officer, a police Cruiser with a flashing light bar, a Chopper with a spinning rotor, and a Tank. They chase you the way the original ghosts do, each in a different way.
+- Power pellets: these are flashing green $ cash symbols. Grabbing one turns the enemies blue so you can catch them for 200, 400, 800 and 1600 points.
+- Screen and sound:
+  - a maze with arcade-style outlined walls and wrap-around side tunnels;
+  - a side panel with score, high score, level, lives and "WANTED" stars that rise with each level;
+  - a police siren playing in the background, plus a "BUSTED!" death animation.
+- Game rules: you start with 3 lives and earn an extra one at 10,000 points. Enemies get faster each level.
+
+About the "GTA images": these are my own GTA-style pixel drawings, not pictures from the games. Real GTA artwork is copyrighted, and a C64 sprite is tiny (16×16 pixels with 3 colours), so a real image wouldn't fit anyway.
+
+Test results in my emulator
+- The title screen, maze and score panel draw correctly.
+- Dots are eaten and scored, and clearing a level gives 2320 points and moves to the next level. A bot cleared 4 levels in a row, and the extra life at 10,000 was awarded.
+- Cash makes the enemies blue, and catching them scores 200 and then 400.
+- Losing a life works, and after game over it goes back to the title screen with the high score kept.
+- I read the disk image back the way a C64 disk drive would, and the file on it matches the game exactly.
+
+To rebuild after changes, run node tools/build.js. The game code is in src/pacman.asm, and the maze and sprite drawings are in tools/build.js, so you can redraw the enemies there. The README.md has the details.
