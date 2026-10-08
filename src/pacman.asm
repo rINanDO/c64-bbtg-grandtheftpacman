@@ -175,6 +175,7 @@ start:
         lda #10
         sta $d026
 
+        jsr intro_bbtg
 main_loop:
         jsr title_screen
         jsr new_game
@@ -363,7 +364,7 @@ print_bcd:
 ; =====================================================================
 title_screen:
         jsr clear_screen
-        jsr music_init
+        jsr music_start
         lda #<title_text
         sta ptr0
         lda #>title_text
@@ -472,6 +473,8 @@ title_text:
 ; =====================================================================
 new_game:
         jsr init_sid            ; music off, game sound effects on
+        lda #0
+        sta music_on
         lda #0
         sta score
         sta score+1
@@ -1831,6 +1834,7 @@ code_end:
 ; =====================================================================
         .org $4000
         .include "music.asm"
+        .include "intro.asm"
 
 high_end:
         .assert high_end <= $a000, "high code runs into BASIC ROM"

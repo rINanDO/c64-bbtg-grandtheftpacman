@@ -12,6 +12,14 @@
 MUS_SPEED = 7                   ; frames per step (~107 bpm in 16ths)
 mptr      = $90                 ; zero page pointer
 
+; start the music unless it is already playing
+music_start:
+        lda music_on
+        bne @r
+        inc music_on
+        jmp music_init
+@r:     rts
+
 music_init:
         ldx #$18
         lda #0
@@ -365,5 +373,6 @@ m_cut:    .byte 0
 m_cutbase: .byte 0
 m_lfodir: .byte 0
 m_fc:     .byte 0
+music_on: .byte 0
 
         .include "gen_music.inc"

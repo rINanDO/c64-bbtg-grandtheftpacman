@@ -12,6 +12,24 @@ Pac-Man for the C64 where the four ghosts are replaced by a GTA-style wanted lis
 Grab the flashing green **$ cash** to scare them (they turn blue), then bust them for 200/400/800/1600.
 The HUD's WANTED stars rise with each level, and a police siren plays in the background. You get an extra life at 10,000.
 
+## Intro & music
+
+The game boots into a **BBTG Vibathon Group 2026** cracktro in the style of the old scene groups:
+
+* a big colour-cycling BBTG logo with a drop shadow,
+* sine-moving raster bars across the border and background,
+* a copper band behind the group name,
+* a smooth-scrolling message line.
+
+The soundtrack is an original G-funk style tune for the SID. It opens with a police-siren wail and pushes the chip hard:
+
+* drum sounds built from wavetables (noise and pulse),
+* resonant filter sweeps on the bass,
+* PWM chord arpeggios,
+* a vibrato "whistle" lead and an oscillator-sync lead.
+
+The music keeps playing on the title screen. Press fire or space to move on.
+
 ## Run in GTK3VICE
 
 * Drag `build/pacman.d64` onto the VICE window (autostart), **or**

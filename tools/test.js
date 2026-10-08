@@ -21,7 +21,7 @@ const frames = Number(process.argv[2] || 3000);
 let seed = Number(process.argv[3] || 1);
 const rand = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed; };
 
-m.runFrames(60);
+m.runFrames(60); m.joy = 0x10; m.runFrames(5); m.joy = 0; m.runFrames(60); // skip intro
 console.log('--- title screen ---');
 console.log(m.screenText());
 m.joy = 0x10; m.runFrames(5); m.joy = 0; // press fire

@@ -62,7 +62,7 @@ class CPU {
     const d = DECODE[op];
     if (!d) throw new Error(`illegal opcode $${op.toString(16)} at $${at.toString(16)}`);
     const [mn, mode] = d;
-    this.cycles += 3;
+    this.cycles += cyclesFor(mn, mode);
     const addr = () => M[mode]();
     const rmw = (fn) => { if (mode === 'acc') { this.a = fn(this.a); return; } const a = addr(); this.wr(a, fn(this.rd(a))); };
     const br = (cond) => { const o = imm(); if (cond) this.pc = (this.pc + ((o ^ 0x80) - 0x80)) & 0xffff; };
@@ -118,6 +118,19 @@ class CPU {
       default: throw new Error(`unimplemented ${mn}`);
     }
   }
+}
+
+// approximate 6502 cycle counts (ignores page-crossing penalties)
+const BASE = { imp: 2, acc: 2, imm: 2, zp: 3, zpx: 4, zpy: 4, abs: 4, abx: 4, aby: 4, izx: 6, izy: 5, rel: 3, ind: 5 };
+const RMW = new Set(['inc', 'dec', 'asl', 'lsr', 'rol', 'ror']);
+function cyclesFor(mn, mode) {
+  if (mn === 'jsr' || mn === 'rts' || mn === 'rti') return 6;
+  if (mn === 'jmp') return mode === 'abs' ? 3 : 5;
+  if (mn === 'pha' || mn === 'php') return 3;
+  if (mn === 'pla' || mn === 'plp') return 4;
+  if (RMW.has(mn) && mode !== 'acc') return BASE[mode] + 2 + (mode === 'abx' ? 1 : 0);
+  if (mn === 'sta' && (mode === 'abx' || mode === 'aby' || mode === 'izy')) return BASE[mode] + 1;
+  return BASE[mode];
 }
 
 const DECODE = {};
